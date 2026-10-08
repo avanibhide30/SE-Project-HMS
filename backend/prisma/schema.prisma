@@ -1,0 +1,252 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            Int            @id @default(autoincrement())
+  email         String         @unique
+  passwordHash  String
+  name          String
+  role          String         // STUDENT, WARDEN, ACCOUNTS, SECURITY, ADMIN
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+
+  student       Student?
+  notices       Notice[]
+  notifications Notification[]
+}
+
+model Student {
+  id                 Int              @id @default(autoincrement())
+  userId             Int              @unique
+  user               User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name               String
+  rollNumber         String           @unique
+  email              String           @unique
+  phone              String
+  gender             String           // Male, Female, Other
+  category           String           // General, OBC, SC, ST, EWS
+  course             String           // B.Tech CSE, B.Tech ECE, M.Tech, MCA, MBA
+  year               Int              // 1, 2, 3, 4
+  guardianName       String
+  guardianPhone      String
+  medicalInfo        String?
+
+  applications       Application[]
+  allocations        Allocation[]
+  payments           Payment[]
+  visitorRequests    VisitorRequest[]
+  curfewRecords      CurfewRecord[]
+  outpasses          Outpass[]
+}
+
+model HostelBlock {
+  id            Int      @id @default(autoincrement())
+  name          String
+  code          String   @unique // BLK-A, BLK-B, BLK-C
+  genderAllowed String   // Male, Female, Co-ed
+  totalFloors   Int
+  rooms         Room[]
+}
+
+model Room {
+  id          Int          @id @default(autoincrement())
+  blockId     Int
+  block       HostelBlock  @relation(fields: [blockId], references: [id], onDelete: Cascade)
+  floor       Int
+  roomNumber  String       @unique // e.g. A-101, B-204
+  capacity    Int          @default(2)
+  roomType    String       // Single AC, Double Non-AC, Triple Non-AC
+  status      String       @default("AVAILABLE") // AVAILABLE, OCCUPIED, MAINTENANCE
+  beds        Bed[]
+  allocations Allocation[]
+}
+
+model Bed {
+  id          Int          @id @default(autoincrement())
+  roomId      Int
+  room        Room         @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  bedNumber   String       // Bed 1, Bed 2, Bed 3
+  isOccupied  Boolean      @default(false)
+  allocations Allocation[]
+
+  @@unique([roomId, bedNumber])
+}
+
+model Application {
+  id                 Int         @id @default(autoincrement())
+  applicationNumber  String      @unique // APP-2026-XXXX
+  studentId          Int
+  student            Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  status             String      @default("SUBMITTED") // DRAFT, SUBMITTED, UNDER_REVIEW, APPROVED, REJECTED, WITHDRAWN
+  roomTypePreference String      // Single AC, Double Non-AC, Triple Non-AC
+  supportingDoc      String?
+  rejectionReason    String?
+  academicTerm       String      @default("2026-27")
+  submittedAt        DateTime    @default(now())
+  reviewedAt         DateTime?
+  allocation         Allocation?
+}
+
+model Allocation {
+  id            Int          @id @default(autoincrement())
+  studentId     Int
+  student       Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  roomId        Int
+  room          Room         @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  bedId         Int
+  bed           Bed          @relation(fields: [bedId], references: [id], onDelete: Cascade)
+  applicationId Int?         @unique
+  application   Application? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  status        String       @default("ACTIVE") // ACTIVE, REALLOCATED, VACATED
+  allocatedAt   DateTime     @default(now())
+  vacatedAt     DateTime?
+}
+
+model FeeHead {
+  id           Int       @id @default(autoincrement())
+  name         String    // Room Rent, Mess Fee, Security Deposit, Maintenance Charge
+  amount       Float
+  term         String    // 2026-27 Semester 1
+  roomCategory String    @default("All") // All, Single AC, Double Non-AC, Triple Non-AC
+  payments     Payment[]
+}
+
+model Payment {
+  id            Int       @id @default(autoincrement())
+  studentId     Int
+  student       Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  feeHeadId     Int
+  feeHead       FeeHead   @relation(fields: [feeHeadId], references: [id], onDelete: Cascade)
+  amount        Float
+  status        String    @default("PENDING") // PENDING, PAID, OVERDUE, FAILED
+  transactionId String?
+  receiptNumber String?
+  paymentMethod String?   // Card, Net Banking, UPI
+  dueDate       DateTime
+  paidAt        DateTime?
+  failureReason String?
+}
+
+model VisitorRequest {
+  id             Int         @id @default(autoincrement())
+  studentId      Int
+  student        Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  visitorName    String
+  visitorContact String
+  relationship   String      // Parent, Guardian, Sibling, Friend
+  purpose        String
+  visitDate      String      // YYYY-MM-DD
+  expectedTime   String      // HH:mm
+  otp            String?
+  otpExpiry      DateTime?
+  otpAttempts    Int         @default(0)
+  isLockedUntil  DateTime?
+  status         String      @default("PENDING") // PENDING, OTP_GENERATED, ALLOWED, INSIDE, COMPLETED, DENIED, EXPIRED, OVERSTAY
+  createdAt      DateTime    @default(now())
+  visitorLog     VisitorLog?
+}
+
+model VisitorLog {
+  id               Int            @id @default(autoincrement())
+  visitorRequestId Int            @unique
+  visitorRequest   VisitorRequest @relation(fields: [visitorRequestId], references: [id], onDelete: Cascade)
+  entryTime        DateTime       @default(now())
+  exitTime         DateTime?
+  status           String         @default("INSIDE") // INSIDE, COMPLETED, OVERSTAY
+  verifiedBy       String?
+}
+
+model CurfewConfig {
+  id                   Int     @id @default(autoincrement())
+  weekdayCurfew        String  @default("21:30") // 9:30 PM
+  weekendCurfew        String  @default("22:30") // 10:30 PM
+  specialCurfew        String  @default("23:00") // 11:00 PM
+  permittedVisitorUntil String  @default("20:00") // 8:00 PM
+  isActive             Boolean @default(true)
+}
+
+model CurfewRecord {
+  id           Int      @id @default(autoincrement())
+  studentId    Int
+  student      Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  entryTime    DateTime @default(now())
+  curfewTime   String
+  delayMinutes Int      @default(0)
+  flaggedLate  Boolean  @default(false)
+  isWaived     Boolean  @default(false)
+  waiveReason  String?
+  recordedBy   String?
+}
+
+model Outpass {
+  id                 Int       @id @default(autoincrement())
+  outpassNumber      String    @unique // OP-2026-XXXX
+  studentId          Int
+  student            Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  type               String    // OUTPASS, LEAVE
+  reason             String
+  destination        String
+  modeOfTravel       String?
+  departureTime      DateTime
+  expectedReturnTime DateTime
+  actualExitTime     DateTime?
+  actualReturnTime   DateTime?
+  status             String    @default("PENDING") // PENDING, APPROVED, REJECTED, CANCELLED, ACTIVE, RETURNED, OVERDUE
+  rejectionReason    String?
+  createdAt          DateTime  @default(now())
+}
+
+model Notice {
+  id            Int          @id @default(autoincrement())
+  title         String
+  body          String
+  category      String       // GENERAL, URGENT, EVENT, MAINTENANCE
+  target        String       @default("ALL")
+  isUrgent      Boolean      @default(false)
+  attachmentUrl String?
+  authorId      Int
+  author        User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  publishedAt   DateTime     @default(now())
+  expiresAt     DateTime?
+  reads         NoticeRead[]
+}
+
+model NoticeRead {
+  id       Int      @id @default(autoincrement())
+  noticeId Int
+  notice   Notice   @relation(fields: [noticeId], references: [id], onDelete: Cascade)
+  userId   Int
+  readAt   DateTime @default(now())
+
+  @@unique([noticeId, userId])
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  type      String   // APPLICATION, ALLOCATION, PAYMENT, VISITOR, CURFEW, OUTPASS, NOTICE
+  link      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int?
+  userName  String?
+  userRole  String?
+  action    String   // LOGIN, APPLICATION_APPROVE, ROOM_ALLOCATE, etc.
+  module    String   // AUTH, APPLICATION, ROOM, FEE, VISITOR, CURFEW, OUTPASS, NOTICE, ADMIN
+  details   String
+  ipAddress String?
+  createdAt DateTime @default(now())
+}

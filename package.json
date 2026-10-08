@@ -1,0 +1,11 @@
+{
+  "name": "hostel-management-system-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install:all": "npm --prefix backend install && npm --prefix frontend install",
+    "db:setup": "cd backend && npx prisma db push && npx prisma db seed",
+    "start:backend": "npm --prefix backend run dev",
+    "start:frontend": "npm --prefix frontend run dev"
+  }
+}
