@@ -82,7 +82,7 @@ export const StudentDashboard: React.FC = () => {
   const urgentNotices = notices.filter((n) => n.isUrgent);
 
   return (
-    <div className="space-y-6">
+    <div className="dashboard-page space-y-6">
       {loadError && (
         <div role="alert" className="flex items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
           <span>Some dashboard information could not be loaded.</span>
@@ -90,12 +90,12 @@ export const StudentDashboard: React.FC = () => {
         </div>
       )}
       {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+      <div className="welcome-panel rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
         <div className="relative z-10 max-w-2xl">
-          <span className="inline-block px-3 py-1 rounded-full bg-blue-500/20 text-blue-200 border border-blue-400/30 text-xs font-bold uppercase tracking-wider mb-3">
+          <span className="welcome-kicker inline-block px-3 py-1 rounded-full border text-xs font-bold uppercase tracking-wider mb-3">
             Academic Session 2026-27
           </span>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+          <h1 className="welcome-title text-3xl sm:text-4xl">
             Welcome back, {user?.name}!
           </h1>
           <p className="mt-2 text-sm text-slate-300 leading-relaxed">

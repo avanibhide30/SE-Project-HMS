@@ -5,6 +5,7 @@ import { AuthRequest, authenticate, requireRole } from '../middleware/auth';
 import { logAudit } from '../middleware/audit';
 
 const router = Router();
+const VALID_USER_ROLES = ['STUDENT', 'WARDEN', 'ACCOUNTS', 'SECURITY', 'ADMIN'];
 
 // Admin: System overview metrics
 router.get('/system-stats', authenticate, requireRole(['ADMIN']), async (req: AuthRequest, res: Response) => {
@@ -88,8 +89,27 @@ router.get('/users', authenticate, requireRole(['ADMIN']), async (req: AuthReque
 router.post('/users', authenticate, requireRole(['ADMIN']), async (req: AuthRequest, res: Response) => {
   try {
     const { name, email, role, password, rollNumber, course, year, gender, category, phone, guardianName, guardianPhone } = req.body;
-    if (!name || !email || !role || !password) {
-      return res.status(400).json({ error: 'Name, email, role, and password are required.' });
+    const normalizedRole = typeof role === 'string' ? role.trim().toUpperCase() : '';
+    if (
+      typeof name !== 'string' || !name.trim() ||
+      typeof email !== 'string' || !email.trim() ||
+      !VALID_USER_ROLES.includes(normalizedRole) ||
+      typeof password !== 'string' || password.length < 6
+    ) {
+      return res.status(400).json({ error: 'Name, email, valid role, and a password of at least 6 characters are required.' });
+    }
+
+    if (normalizedRole === 'STUDENT' && (typeof rollNumber !== 'string' || !rollNumber.trim())) {
+      return res.status(400).json({ error: 'A student roll number is required for student accounts.' });
+    }
+
+    if (normalizedRole === 'STUDENT') {
+      const existingStudent = await prisma.student.findUnique({
+        where: { rollNumber: rollNumber.trim() },
+      });
+      if (existingStudent) {
+        return res.status(400).json({ error: 'A student with this roll number already exists.' });
+      }
     }
 
     const existing = await prisma.user.findUnique({ where: { email: email.trim() } });
@@ -105,13 +125,13 @@ router.post('/users', authenticate, requireRole(['ADMIN']), async (req: AuthRequ
         data: {
           name: name.trim(),
           email: email.trim(),
-          role: role.toUpperCase(),
+          role: normalizedRole,
           passwordHash,
           isActive: true,
         },
       });
 
-      if (u.role === 'STUDENT' && rollNumber) {
+      if (u.role === 'STUDENT') {
         await tx.student.create({
           data: {
             userId: u.id,
@@ -154,16 +174,30 @@ router.put('/users/:id', authenticate, requireRole(['ADMIN']), async (req: AuthR
   try {
     const userId = parseInt(req.params.id);
     const { name, role, isActive } = req.body;
+    const normalizedRole = typeof role === 'string' ? role.trim().toUpperCase() : undefined;
 
-    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (role !== undefined && (!normalizedRole || !VALID_USER_ROLES.includes(normalizedRole))) {
+      return res.status(400).json({ error: 'A valid role is required.' });
+    }
+    if (name !== undefined && (typeof name !== 'string' || !name.trim())) {
+      return res.status(400).json({ error: 'A non-empty name is required.' });
+    }
+    if (isActive !== undefined && typeof isActive !== 'boolean') {
+      return res.status(400).json({ error: 'Account status must be a boolean.' });
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: userId }, include: { student: true } });
     if (!user) return res.status(404).json({ error: 'User not found.' });
+    if (normalizedRole === 'STUDENT' && !user.student) {
+      return res.status(400).json({ error: 'A student profile is required before assigning the STUDENT role.' });
+    }
 
     const updated = await prisma.user.update({
       where: { id: userId },
       data: {
-        name: name !== undefined ? name : user.name,
-        role: role !== undefined ? role : user.role,
-        isActive: isActive !== undefined ? Boolean(isActive) : user.isActive,
+        name: name !== undefined ? name.trim() : user.name,
+        role: normalizedRole ?? user.role,
+        isActive: isActive ?? user.isActive,
       },
     });
 

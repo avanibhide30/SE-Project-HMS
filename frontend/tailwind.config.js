@@ -6,6 +6,10 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['DM Sans', 'sans-serif'],
+        display: ['Newsreader', 'Georgia', 'serif'],
+      },
       colors: {
         brand: {
           50: '#f0f6fe',

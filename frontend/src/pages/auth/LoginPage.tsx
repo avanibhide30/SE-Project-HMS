@@ -76,12 +76,12 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-blue-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans">
+    <div className="login-scene min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center px-4">
-        <div className="inline-flex items-center justify-center p-3 bg-blue-600 rounded-2xl text-white shadow-xl shadow-blue-500/20 mb-4 ring-8 ring-blue-600/20">
+        <div className="login-mark inline-flex items-center justify-center p-3 rounded-2xl text-white shadow-xl mb-4 ring-8">
           <Building2 className="w-8 h-8" />
         </div>
-        <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+        <h2 className="login-title text-3xl sm:text-4xl text-white">
           Central Hostel Portal
         </h2>
         <p className="mt-1.5 text-xs sm:text-sm text-slate-300">
@@ -90,21 +90,21 @@ export const LoginPage: React.FC = () => {
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">
-        <div className="bg-white py-8 px-6 sm:px-10 shadow-2xl rounded-3xl border border-slate-100 relative overflow-hidden">
+        <div className="login-card bg-white py-8 px-6 sm:px-10 shadow-2xl rounded-3xl border border-slate-100 relative overflow-hidden">
           {/* Accent header bar */}
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-500" />
+          <div className="login-accent absolute top-0 left-0 right-0 h-1.5" />
 
           {/* Quick Demo Switcher Strip for Evaluators */}
           <div className="mb-6 pb-6 border-b border-slate-100">
             <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5">
-              <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+              <Sparkles className="login-sparkle w-3.5 h-3.5" />
               <span>Instant 1-Click Role Sign-In:</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => handleQuickDemo('STUDENT')}
-                className="flex items-center gap-2 p-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 text-xs font-bold transition text-left active:scale-95"
+                className="demo-role flex items-center gap-2 p-2 rounded-xl border text-xs font-bold transition text-left active:scale-95"
               >
                 <GraduationCap className="w-4 h-4 text-blue-700 flex-shrink-0" />
                 <div className="truncate">
@@ -116,7 +116,7 @@ export const LoginPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleQuickDemo('WARDEN')}
-                className="flex items-center gap-2 p-2 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-200 text-xs font-bold transition text-left active:scale-95"
+                className="demo-role flex items-center gap-2 p-2 rounded-xl border text-xs font-bold transition text-left active:scale-95"
               >
                 <ShieldCheck className="w-4 h-4 text-purple-700 flex-shrink-0" />
                 <div className="truncate">
@@ -128,7 +128,7 @@ export const LoginPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleQuickDemo('ACCOUNTS')}
-                className="flex items-center gap-2 p-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200 text-xs font-bold transition text-left active:scale-95"
+                className="demo-role flex items-center gap-2 p-2 rounded-xl border text-xs font-bold transition text-left active:scale-95"
               >
                 <CreditCard className="w-4 h-4 text-emerald-700 flex-shrink-0" />
                 <div className="truncate">
@@ -140,7 +140,7 @@ export const LoginPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleQuickDemo('SECURITY')}
-                className="flex items-center gap-2 p-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-xs font-bold transition text-left active:scale-95"
+                className="demo-role flex items-center gap-2 p-2 rounded-xl border text-xs font-bold transition text-left active:scale-95"
               >
                 <ShieldAlert className="w-4 h-4 text-amber-700 flex-shrink-0" />
                 <div className="truncate">
@@ -153,7 +153,7 @@ export const LoginPage: React.FC = () => {
             <button
               type="button"
               onClick={() => handleQuickDemo('ADMIN')}
-              className="mt-2 w-full flex items-center justify-center gap-2 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-semibold transition"
+              className="demo-admin mt-2 w-full flex items-center justify-center gap-2 py-1.5 rounded-lg text-[11px] font-semibold transition"
             >
               <Users className="w-3.5 h-3.5" /> Or sign in as System Administrator
             </button>
@@ -212,7 +212,7 @@ export const LoginPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => showToast('For password reset, please contact the System Administrator or Warden.', 'info')}
-                className="font-semibold text-blue-600 hover:text-blue-800"
+                className="login-link font-semibold hover:text-blue-800"
               >
                 Forgot password?
               </button>
@@ -222,7 +222,7 @@ export const LoginPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex items-center justify-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-lg shadow-blue-900/20 text-sm font-bold text-white bg-blue-900 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition active:scale-95 disabled:opacity-50"
+                className="login-submit w-full flex items-center justify-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-lg text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition active:scale-95 disabled:opacity-50"
               >
                 {isLoading ? (
                   <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

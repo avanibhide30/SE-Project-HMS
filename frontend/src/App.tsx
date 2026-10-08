@@ -96,10 +96,6 @@ export const App: React.FC = () => {
           <Route path="/admin/rooms" element={<StaffPage />} />
           <Route path="/admin/notices" element={<StaffPage />} />
         </Route>
-        <Route element={<RequireRole roles={['ADMIN']} />}>
-          <Route path="/admin/applications" element={<StaffPage />} />
-          <Route path="/admin/rooms" element={<StaffPage />} />
-        </Route>
         <Route element={<RequireRole roles={['WARDEN', 'ACCOUNTS', 'ADMIN']} />}>
           <Route path="/reports" element={<StaffPage />} />
         </Route>

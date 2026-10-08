@@ -107,7 +107,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
   const timeFormatted = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 
   return (
-    <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-6 py-2.5 transition-all">
+    <header className="site-header sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-6 py-2.5 transition-all">
       <div className="flex items-center justify-between">
         {/* Left Section: Menu Toggle + Institution Brand */}
         <div className="flex items-center gap-3">
@@ -120,7 +120,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
           </button>
 
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-blue-900 text-white flex items-center justify-center shadow-md shadow-blue-900/20">
+            <div className="header-mark w-9 h-9 rounded-xl text-white flex items-center justify-center">
               <Building2 className="w-5 h-5" />
             </div>
             <div>
@@ -128,7 +128,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
                 <span className="font-extrabold text-sm sm:text-base tracking-tight text-slate-900">
                   HOSTEL MS
                 </span>
-                <span className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-bold uppercase rounded bg-blue-50 text-blue-800 border border-blue-200">
+                <span className="header-tag hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-bold uppercase rounded border">
                   SaaS Portal
                 </span>
               </div>
@@ -155,7 +155,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
           <div className="relative" ref={roleMenuRef}>
             <button
               onClick={() => setIsRoleMenuOpen(!isRoleMenuOpen)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 text-xs font-semibold shadow-sm transition active:scale-95"
+              className="role-switcher flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-semibold shadow-sm transition active:scale-95"
             >
               <Sparkles className="w-3.5 h-3.5 text-blue-600" />
               <span className="hidden md:inline">Demo Switch:</span>
